@@ -42,6 +42,7 @@ pub const FOOD_SPRITE: &str = "red-dot.png";
 
 // NN
 pub const NUM_INPUT_NODES: usize = 3;
+pub const NUM_INPUT_NODES_W_BIAS: usize = NUM_INPUT_NODES + 1;
 pub const NUM_HIDDEN_NODES: usize = 8;
 pub const NUM_OUTPUT_NODES: usize = 4;
 pub const NET_ARCH: [usize; 3] = [NUM_INPUT_NODES, NUM_HIDDEN_NODES, NUM_OUTPUT_NODES];

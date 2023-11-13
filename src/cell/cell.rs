@@ -34,9 +34,11 @@ pub struct CellPlugin;
 pub struct Cell(pub u32);
 #[derive(Resource)]
 pub struct CellId(pub u32);
+
+const NUM_INPUT_NODES_W_BIAS: usize = NUM_INPUT_NODES + 1;
 #[derive(Component)]
 //pub struct Brain(pub Net);
-pub struct Brain(pub VaiNet<NUM_INPUT_NODES, NUM_OUTPUT_NODES, NUM_HIDDEN_NODES>);
+pub struct Brain(pub VaiNet<NUM_INPUT_NODES_W_BIAS, NUM_OUTPUT_NODES, NUM_HIDDEN_NODES>);
 
 pub struct CellAction {
     pub thrust: bool,

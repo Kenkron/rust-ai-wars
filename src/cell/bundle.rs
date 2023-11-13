@@ -32,7 +32,7 @@ impl CellBundle {
         x: f32,
         y: f32,
         cell_id: u32,
-        net: VaiNet<NUM_INPUT_NODES, NUM_OUTPUT_NODES, NUM_HIDDEN_NODES>,
+        net: VaiNet<NUM_INPUT_NODES_W_BIAS, NUM_OUTPUT_NODES, NUM_HIDDEN_NODES>,
         sprite_path: &str,
         asset_server: &AssetServer,
     ) -> Self {
