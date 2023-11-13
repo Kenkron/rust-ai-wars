@@ -13,7 +13,7 @@ pub const NN_NODE_SIZE: f32 = 10.0;
 
 // Cell
 pub const NUM_CELLS: usize = 1000;
-pub const CELL_SPEED: f32 = 1.0;
+pub const CELL_SPEED: f32 = 5.0;
 pub const BASE_ENERGY: f32 = 100.0;
 pub const ENERGY_UPDATE_INTERVAL_SECS: f32 = 1.0;
 pub const ENERGY_DECAY_RATE: f32 = 5.0;

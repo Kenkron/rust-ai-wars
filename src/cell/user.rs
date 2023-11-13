@@ -11,7 +11,7 @@ use crate::{
     food::FoodTree,
     nn::Net,
     trackers::{LastBulletFired, LastUpdated, OneSecondTimer, PeriodicUpdateInterval},
-    *, vain::VaiNet,
+    *,
 };
 
 use super::{

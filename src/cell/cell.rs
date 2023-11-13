@@ -11,7 +11,7 @@ use crate::{
     bullet::BulletBundle,
     food::FoodTree,
     gui::SimStats,
-    nn::*,
+    nn::Net,
     settings::SimSettings,
     trackers::{
         BirthPlace, BirthTs, FitnessScores, LastBulletFired, LastUpdated, NumCellsSpawned,
@@ -33,7 +33,6 @@ pub struct CellPlugin;
 pub struct Cell(pub u32);
 #[derive(Resource)]
 pub struct CellId(pub u32);
-
 #[derive(Component)]
 pub struct Brain(pub Net);
 
@@ -161,7 +160,7 @@ fn update_cell_sprite(
     asset_server: Res<AssetServer>,
     stats: Res<SimStats>,
     energy_map: Res<EnergyMap>,
-    mut cell_query: Query<(&Cell, &BirthTs, &Transform, &mut Handle<Image>), (With<Cell>, With<Brain>)>,
+    mut cell_query: Query<(&Cell, &BirthTs, &Transform, &mut Handle<Image>), With<Cell>>,
 ) {
     if !settings.follow_best && !settings.follow_oldest {
         return;
