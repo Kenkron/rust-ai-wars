@@ -12,7 +12,6 @@ use crate::{
     food::FoodTree,
     gui::SimStats,
     nn::*,
-    vain::VaiNet,
     settings::SimSettings,
     trackers::{
         BirthPlace, BirthTs, FitnessScores, LastBulletFired, LastUpdated, NumCellsSpawned,
@@ -35,10 +34,8 @@ pub struct Cell(pub u32);
 #[derive(Resource)]
 pub struct CellId(pub u32);
 
-const NUM_INPUT_NODES_W_BIAS: usize = NUM_INPUT_NODES + 1;
 #[derive(Component)]
-//pub struct Brain(pub Net);
-pub struct Brain(pub Box<dyn CellNN>);
+pub struct Brain(pub Net);
 
 pub struct CellAction {
     pub thrust: bool,
@@ -164,7 +161,7 @@ fn update_cell_sprite(
     asset_server: Res<AssetServer>,
     stats: Res<SimStats>,
     energy_map: Res<EnergyMap>,
-    mut cell_query: Query<(&Cell, &BirthTs, &Transform, &mut Handle<Image>), With<Cell>>,
+    mut cell_query: Query<(&Cell, &BirthTs, &Transform, &mut Handle<Image>), (With<Cell>, With<Brain>)>,
 ) {
     if !settings.follow_best && !settings.follow_oldest {
         return;
@@ -198,6 +195,82 @@ fn update_cell_sprite(
         } else {
             *image_handle = asset_server.load(CELL_SPRITE);
         }
+    }
+}
+
+pub fn get_nn_inputs(
+    transform: &Transform,
+    food_tree: &Res<FoodTree>
+) -> [f64; 3] {
+    let mut target_x = 0.0;
+    let mut target_y = 0.0;
+    // Get the closest food
+    let key = (transform.translation.x, transform.translation.y);
+    if let Some(t) = &food_tree.0 {
+        match t.nearest(&[key.0 as f32, key.1 as f32]) {
+            Some(v) => {
+                let [x, y] = v.item;
+                target_x = *x;
+                target_y = *y;
+            }
+            None => {}
+        }
+    }
+
+    // NN Inputs
+    let nn_inp_dist = transform
+        .translation
+        .truncate()
+        .distance(vec2(target_x as f32, target_y as f32))
+        / VISION_RADIUS;
+    let nn_inp_dist = if nn_inp_dist > 1.0 { 1.0 } else { nn_inp_dist };
+
+    let nn_inp_angle = angle_between(
+        transform.translation.x,
+        transform.translation.y,
+        target_x,
+        target_y,
+    );
+    let nn_inp_angle = nn_inp_angle / 360.0;
+    let nn_target_angle = if nn_inp_angle < 0.0 {
+        nn_inp_angle + 360.0
+    } else {
+        nn_inp_angle
+    };
+
+    let nn_cell_angle = (transform.rotation.to_euler(EulerRot::XYZ).2 + PI / 2.0).to_degrees();
+    let nn_cell_angle = if nn_cell_angle < 0.0 {
+        nn_cell_angle + 360.0
+    } else {
+        nn_cell_angle
+    };
+    let nn_cell_angle = nn_cell_angle / 360.0;
+    // let angle_diff = nn_cell_angle / 360.0;
+
+    [
+        nn_inp_dist as f64,
+        nn_target_angle as f64,
+        nn_cell_angle as f64,
+    ]
+}
+
+pub fn get_nn_cell_action(output: &Vec<f64>) -> CellAction {
+    let mut spin_left = false;
+    let mut spin_right = false;
+    let thrust = output[2] >= 0.7;
+    let shoot = output[3] >= 0.7;
+
+    if output[0] > output[1] {
+        spin_left = true;
+    } else if output[1] > output[0] {
+        spin_right = true;
+    }
+
+    CellAction {
+        thrust,
+        spin_left,
+        spin_right,
+        shoot,
     }
 }
 
@@ -244,83 +317,21 @@ fn update_cells_system(
         }
 
         last_updated.0.set_instant_now();
-        let mut target_x = 0.0;
-        let mut target_y = 0.0;
-        // Get the closest food
-        let key = (transform.translation.x, transform.translation.y);
-        if let Some(t) = &food_tree.0 {
-            match t.nearest(&[key.0 as f32, key.1 as f32]) {
-                Some(v) => {
-                    let [x, y] = v.item;
-                    target_x = *x;
-                    target_y = *y;
-                }
-                None => {}
-            }
-        }
 
-        // NN Inputs
-        let nn_inp_dist = transform
-            .translation
-            .truncate()
-            .distance(vec2(target_x as f32, target_y as f32))
-            / VISION_RADIUS;
-        let nn_inp_dist = if nn_inp_dist > 1.0 { 1.0 } else { nn_inp_dist };
-
-        let nn_inp_angle = angle_between(
-            transform.translation.x,
-            transform.translation.y,
-            target_x,
-            target_y,
-        );
-        let nn_inp_angle = nn_inp_angle / 360.0;
-        let nn_target_angle = if nn_inp_angle < 0.0 {
-            nn_inp_angle + 360.0
-        } else {
-            nn_inp_angle
-        };
-
-        let nn_cell_angle = (transform.rotation.to_euler(EulerRot::XYZ).2 + PI / 2.0).to_degrees();
-        let nn_cell_angle = if nn_cell_angle < 0.0 {
-            nn_cell_angle + 360.0
-        } else {
-            nn_cell_angle
-        };
-        let nn_cell_angle = nn_cell_angle / 360.0;
-        // let angle_diff = nn_cell_angle / 360.0;
+        let input = get_nn_inputs(&transform, &food_tree);
 
         // Update brain
-        let input = [
-            nn_inp_dist as f64,
-            nn_target_angle as f64,
-            nn_cell_angle as f64,
-        ];
         let output = &brain.0.predict(&input.to_vec());
         if focused_cell_stats.id == cell.0 {
             focused_cell_net.0 = output.clone();
         }
 
         let output = &output[NET_ARCH.len() - 1];
-        let mut spin_left = false;
-        let mut spin_right = false;
-        let thrust = output[2] >= 0.7;
-        let shoot = output[3] >= 0.7;
-
-        if output[0] > output[1] {
-            spin_left = true;
-        } else if output[1] > output[0] {
-            spin_right = true;
-        }
 
         let fitness = calc_fitness(input, [output[0], output[1], output[2], output[3]]);
         fitness_scores.push(fitness);
 
-        let action = CellAction {
-            thrust,
-            spin_left,
-            spin_right,
-            shoot,
-        };
+        let action = get_nn_cell_action(output);
         perform_cell_action(
             action,
             cell.0,
@@ -411,7 +422,7 @@ fn cell_replication_system(
 
                 let x = rng.gen_range(-(W as f32) / 2.0..W as f32 / 2.0);
                 let y = rng.gen_range(-(H as f32) / 2.0..H as f32 / 2.0);
-                let mut child_net = brain.0.box_clone();
+                let mut child_net = brain.0.clone();
                 child_net.mutate();
 
                 cell_id.0 += 1;
@@ -447,22 +458,21 @@ fn spawn_cells(
     for _ in 0..NUM_CELLS {
         let x = rng.gen_range(-(W as f32) / 2.0..W as f32 / 2.0);
         let y = rng.gen_range(-(H as f32) / 2.0..H as f32 / 2.0);
-        //let net = Net::new(NET_ARCH.to_vec());
-        let net = VaiNet::<NUM_INPUT_NODES_W_BIAS, NUM_OUTPUT_NODES, NUM_HIDDEN_NODES>::new();
+        let net = Net::new(NET_ARCH.to_vec());
 
         cell_id.0 += 1;
         commands.spawn(CellBundle::new(
             x,
             y,
             cell_id.0,
-            Box::new(net),
+            net,
             CELL_SPRITE,
             &asset_server,
         ));
     }
 }
 
-fn calc_fitness(inp: [f64; NUM_INPUT_NODES], out: [f64; NUM_OUTPUT_NODES]) -> f32 {
+pub fn calc_fitness(inp: [f64; NUM_INPUT_NODES], out: [f64; NUM_OUTPUT_NODES]) -> f32 {
     // Inp
     // 1 - dist between cell and target
     // 2 - angle diff between cell and target

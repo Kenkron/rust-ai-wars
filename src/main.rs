@@ -1,5 +1,5 @@
 use ava::{
-    bullet::BulletPlugin, camera::FollowCameraPlugin, cell::CellPlugin, food::FoodPlugin,
+    bullet::BulletPlugin, camera::FollowCameraPlugin, cell::CellPlugin, cell::VaiCellPlugin, food::FoodPlugin,
     gui::GuiPlugin, physics::PhysicsPlugin, settings::SettingsPlugin, trackers::TrackersPlugin, *,
 };
 use bevy::{
@@ -40,5 +40,6 @@ fn main() {
         .add_plugins(BulletPlugin)
         .add_plugins(FoodPlugin)
         .add_plugins(CellPlugin)
+        .add_plugins(VaiCellPlugin)
         .run();
 }

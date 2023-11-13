@@ -1,5 +1,4 @@
 use vai::*;
-use crate::nn::CellNN;
 
 #[derive(Clone)]
 pub struct VaiNet<
@@ -20,14 +19,7 @@ VaiNet<I,O,HIDDEN> {
             layers: VAI::<I, O, HIDDEN, 0>::new().create_variant(5.)
         }
     }
-}
-
-impl<
-    const I: usize,
-    const O: usize,
-    const HIDDEN: usize>
-CellNN for VaiNet<I,O,HIDDEN> {
-    fn predict(&self, inputs: &Vec<f64>)
+    pub fn predict(&self, inputs: &Vec<f64>)
     -> Vec<Vec<f64>> {
         // translate input to f32
         let mut input_f32: Vec<f32> = inputs.iter().map(|x| x.to_owned() as f32).collect();
@@ -38,10 +30,7 @@ CellNN for VaiNet<I,O,HIDDEN> {
             .map(|layer| layer.iter().map(|x| x.to_owned() as f64).collect())
             .collect()
     }
-    fn mutate(&mut self) {
+    pub fn mutate(&mut self) {
         self.layers.create_variant(1.0);
-    }
-    fn box_clone(&self) -> Box<dyn CellNN> {
-        return Box::new(self.clone());
     }
 }

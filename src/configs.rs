@@ -12,7 +12,7 @@ pub const MAX_GRAPH_POINTS: usize = 1500;
 pub const NN_NODE_SIZE: f32 = 10.0;
 
 // Cell
-pub const NUM_CELLS: usize = 2000;
+pub const NUM_CELLS: usize = 1000;
 pub const CELL_SPEED: f32 = 1.0;
 pub const BASE_ENERGY: f32 = 100.0;
 pub const ENERGY_UPDATE_INTERVAL_SECS: f32 = 1.0;
@@ -42,7 +42,6 @@ pub const FOOD_SPRITE: &str = "red-dot.png";
 
 // NN
 pub const NUM_INPUT_NODES: usize = 3;
-pub const NUM_INPUT_NODES_W_BIAS: usize = NUM_INPUT_NODES + 1;
 pub const NUM_HIDDEN_NODES: usize = 8;
 pub const NUM_OUTPUT_NODES: usize = 4;
 pub const NET_ARCH: [usize; 3] = [NUM_INPUT_NODES, NUM_HIDDEN_NODES, NUM_OUTPUT_NODES];

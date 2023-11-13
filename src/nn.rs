@@ -1,6 +1,6 @@
 use rand::Rng;
 
-use crate::{*, cell::Cell};
+use crate::*;
 
 #[derive(Clone)]
 pub struct Net {
@@ -11,12 +11,6 @@ pub struct Net {
 #[derive(Clone)]
 struct Layer {
     nodes: Vec<Vec<f64>>,
-}
-
-pub trait CellNN: Send + Sync {
-    fn predict(&self, inputs: &Vec<f64>) -> Vec<Vec<f64>>;
-    fn mutate(&mut self);
-    fn box_clone(&self) -> Box<dyn CellNN>;
 }
 
 impl Net {
@@ -44,10 +38,8 @@ impl Net {
             n_inputs: first_layer_size,
         }
     }
-}
 
-impl CellNN for Net {
-    fn predict(&self, inputs: &Vec<f64>) -> Vec<Vec<f64>> {
+    pub fn predict(&self, inputs: &Vec<f64>) -> Vec<Vec<f64>> {
         if inputs.len() != self.n_inputs {
             panic!("Bad input size");
         }
@@ -62,12 +54,8 @@ impl CellNN for Net {
         outputs
     }
 
-    fn mutate(&mut self) {
+    pub fn mutate(&mut self) {
         self.layers.iter_mut().for_each(|l| l.mutate());
-    }
-
-    fn box_clone(&self) -> Box<dyn CellNN> {
-        return Box::new(self.clone());
     }
 }
 
