@@ -38,7 +38,7 @@ pub struct CellId(pub u32);
 const NUM_INPUT_NODES_W_BIAS: usize = NUM_INPUT_NODES + 1;
 #[derive(Component)]
 //pub struct Brain(pub Net);
-pub struct Brain(pub VaiNet<NUM_INPUT_NODES_W_BIAS, NUM_OUTPUT_NODES, NUM_HIDDEN_NODES>);
+pub struct Brain(pub Box<dyn CellNN>);
 
 pub struct CellAction {
     pub thrust: bool,
@@ -411,7 +411,7 @@ fn cell_replication_system(
 
                 let x = rng.gen_range(-(W as f32) / 2.0..W as f32 / 2.0);
                 let y = rng.gen_range(-(H as f32) / 2.0..H as f32 / 2.0);
-                let mut child_net = brain.0.clone();
+                let mut child_net = brain.0.box_clone();
                 child_net.mutate();
 
                 cell_id.0 += 1;
@@ -448,14 +448,14 @@ fn spawn_cells(
         let x = rng.gen_range(-(W as f32) / 2.0..W as f32 / 2.0);
         let y = rng.gen_range(-(H as f32) / 2.0..H as f32 / 2.0);
         //let net = Net::new(NET_ARCH.to_vec());
-        let net = VaiNet::new();
+        let net = VaiNet::<NUM_INPUT_NODES_W_BIAS, NUM_OUTPUT_NODES, NUM_HIDDEN_NODES>::new();
 
         cell_id.0 += 1;
         commands.spawn(CellBundle::new(
             x,
             y,
             cell_id.0,
-            net,
+            Box::new(net),
             CELL_SPRITE,
             &asset_server,
         ));

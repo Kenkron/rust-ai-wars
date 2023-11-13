@@ -4,15 +4,15 @@ pub const WH: usize = 700;
 pub const BG_COLOR: (u8, u8, u8) = (195, 232, 208);
 
 // Environment
-pub const W: usize = 10000;
-pub const H: usize = 10000;
+pub const W: usize = 20000;
+pub const H: usize = 20000;
 
 // GUI
 pub const MAX_GRAPH_POINTS: usize = 1500;
 pub const NN_NODE_SIZE: f32 = 10.0;
 
 // Cell
-pub const NUM_CELLS: usize = 4000;
+pub const NUM_CELLS: usize = 2000;
 pub const CELL_SPEED: f32 = 1.0;
 pub const BASE_ENERGY: f32 = 100.0;
 pub const ENERGY_UPDATE_INTERVAL_SECS: f32 = 1.0;

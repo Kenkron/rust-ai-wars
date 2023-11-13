@@ -13,9 +13,10 @@ struct Layer {
     nodes: Vec<Vec<f64>>,
 }
 
-pub trait CellNN: Clone + Send + Sync {
+pub trait CellNN: Send + Sync {
     fn predict(&self, inputs: &Vec<f64>) -> Vec<Vec<f64>>;
     fn mutate(&mut self);
+    fn box_clone(&self) -> Box<dyn CellNN>;
 }
 
 impl Net {
@@ -63,6 +64,10 @@ impl CellNN for Net {
 
     fn mutate(&mut self) {
         self.layers.iter_mut().for_each(|l| l.mutate());
+    }
+
+    fn box_clone(&self) -> Box<dyn CellNN> {
+        return Box::new(self.clone());
     }
 }
 

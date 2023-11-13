@@ -38,9 +38,9 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     }
 
     //let net = Net::new(NET_ARCH.to_vec());
-    let net = VaiNet::new();
+    let net = VaiNet::<NUM_INPUT_NODES_W_BIAS, NUM_OUTPUT_NODES, NUM_HIDDEN_NODES>::new();
     commands.spawn((
-        CellBundle::new(0.0, 0.0, 0, net, USER_CELL_SPRITE, &asset_server),
+        CellBundle::new(0.0, 0.0, 0, Box::new(net), USER_CELL_SPRITE, &asset_server),
         UserControlledCell,
     ));
 }

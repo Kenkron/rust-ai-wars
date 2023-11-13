@@ -41,4 +41,7 @@ CellNN for VaiNet<I,O,HIDDEN> {
     fn mutate(&mut self) {
         self.layers.create_variant(1.0);
     }
+    fn box_clone(&self) -> Box<dyn CellNN> {
+        return Box::new(self.clone());
+    }
 }
