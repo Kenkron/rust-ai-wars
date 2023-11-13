@@ -4,7 +4,7 @@ use bevy_rapier2d::prelude::*;
 use rand::Rng;
 
 use crate::trackers::*;
-use crate::{nn::Net, *};
+use crate::{nn::Net, vain::VaiNet, *};
 
 use super::{Brain, Cell};
 
@@ -32,7 +32,7 @@ impl CellBundle {
         x: f32,
         y: f32,
         cell_id: u32,
-        net: Net,
+        net: VaiNet<NUM_INPUT_NODES, NUM_OUTPUT_NODES, NUM_HIDDEN_NODES>,
         sprite_path: &str,
         asset_server: &AssetServer,
     ) -> Self {

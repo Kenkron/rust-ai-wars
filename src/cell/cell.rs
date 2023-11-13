@@ -11,7 +11,8 @@ use crate::{
     bullet::BulletBundle,
     food::FoodTree,
     gui::SimStats,
-    nn::Net,
+    nn::*,
+    vain::VaiNet,
     settings::SimSettings,
     trackers::{
         BirthPlace, BirthTs, FitnessScores, LastBulletFired, LastUpdated, NumCellsSpawned,
@@ -34,7 +35,8 @@ pub struct Cell(pub u32);
 #[derive(Resource)]
 pub struct CellId(pub u32);
 #[derive(Component)]
-pub struct Brain(pub Net);
+//pub struct Brain(pub Net);
+pub struct Brain(pub VaiNet<NUM_INPUT_NODES, NUM_OUTPUT_NODES, NUM_HIDDEN_NODES>);
 
 pub struct CellAction {
     pub thrust: bool,
@@ -443,7 +445,8 @@ fn spawn_cells(
     for _ in 0..NUM_CELLS {
         let x = rng.gen_range(-(W as f32) / 2.0..W as f32 / 2.0);
         let y = rng.gen_range(-(H as f32) / 2.0..H as f32 / 2.0);
-        let net = Net::new(NET_ARCH.to_vec());
+        //let net = Net::new(NET_ARCH.to_vec());
+        let net = VaiNet::new();
 
         cell_id.0 += 1;
         commands.spawn(CellBundle::new(

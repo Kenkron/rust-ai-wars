@@ -343,7 +343,7 @@ fn get_nn_shapes(best_brain: &FocusedCellNet) -> Vec<Shape> {
     }
 
     let mut shapes = Vec::new();
-    let tot_height = 450.0;
+    let tot_height = 350.0;
 
     // Padding
     let padding_top = 30.0;

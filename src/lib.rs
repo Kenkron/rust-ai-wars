@@ -5,6 +5,7 @@ pub mod configs;
 pub mod food;
 pub mod gui;
 pub mod nn;
+pub mod vain;
 pub mod physics;
 pub mod settings;
 pub mod trackers;
